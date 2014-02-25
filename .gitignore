@@ -1,0 +1,28 @@
+# Java #
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Latex #
+*.aux
+*.log
+*.backup
+*.pdf
+*.toc
+# backup files #
+*~
+
+# not source directories #
+nbproject/
+build/
+dist/
+
+# hidden files #
+.*
+
+# other #
+build.xml
+manifest.mf
