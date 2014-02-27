@@ -12,7 +12,5 @@ public class WorkoutPlan implements Serializable
 {
     int series;
     double betweenSeriesTime;
-    double betweenExercisesTime;
-    double repetitionTime;
-    ArrayList<Integer> repetitions;
+    ArrayList<ExercisePlan> exercises;
 }

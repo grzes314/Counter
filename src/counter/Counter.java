@@ -19,5 +19,6 @@ public class Counter extends JFrame
         super("Counter");
         setSize(800,600);
         add(new MainPanel());
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 }
