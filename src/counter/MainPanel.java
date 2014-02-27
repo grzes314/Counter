@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package counter;
 
@@ -17,7 +12,7 @@ import javax.swing.table.TableModel;
  */
 public class MainPanel extends javax.swing.JPanel
 {
-
+    MyTableModel tableModel = new MyTableModel();
     /**
      * Creates new form MainPanel
      */
@@ -49,14 +44,34 @@ public class MainPanel extends javax.swing.JPanel
         series = new javax.swing.JSpinner();
         jScrollPane1 = new javax.swing.JScrollPane();
         table = new javax.swing.JTable();
+        buttonAdd = new javax.swing.JButton();
+        buttonRem = new javax.swing.JButton();
 
         jLabel1.setText("Number of series: ");
 
         series.setModel(new javax.swing.SpinnerNumberModel(1, 1, 100, 1));
 
-        table.setModel(new MyTableModel());
+        table.setModel(tableModel);
         table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(table);
+
+        buttonAdd.setText("Add exercise");
+        buttonAdd.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonAddActionPerformed(evt);
+            }
+        });
+
+        buttonRem.setText("Remove exercise");
+        buttonRem.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonRemActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -68,6 +83,12 @@ public class MainPanel extends javax.swing.JPanel
                 .addComponent(series, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(41, 41, 41)
+                .addComponent(buttonAdd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(buttonRem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(38, 38, 38))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -77,12 +98,29 @@ public class MainPanel extends javax.swing.JPanel
                     .addComponent(series, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
-                .addGap(130, 130, 130))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buttonAdd)
+                    .addComponent(buttonRem))
+                .addGap(87, 87, 87))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void buttonRemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonRemActionPerformed
+    {//GEN-HEADEREND:event_buttonRemActionPerformed
+        int row = table.getSelectedRow();
+        tableModel.removeExercise(row);
+    }//GEN-LAST:event_buttonRemActionPerformed
+
+    private void buttonAddActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonAddActionPerformed
+    {//GEN-HEADEREND:event_buttonAddActionPerformed
+        tableModel.addExercise();
+    }//GEN-LAST:event_buttonAddActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonAdd;
+    private javax.swing.JButton buttonRem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSpinner series;
@@ -92,20 +130,20 @@ public class MainPanel extends javax.swing.JPanel
 
 class MyTableModel implements TableModel
 {
-    int exercises;
-    ArrayList<Integer> repetitions = new ArrayList<>();
+    int exercisesCount;
+    ArrayList<ExercisePlan> exercises = new ArrayList<>();
     private final ArrayList<TableModelListener> tableModelListeners = new ArrayList<>();
     
     @Override
     public int getRowCount()
     {
-        return exercises + 1;
+        return exercisesCount;
     }
 
     @Override
     public int getColumnCount()
     {
-        return 2;
+        return 4;
     }
 
     @Override
@@ -114,9 +152,13 @@ class MyTableModel implements TableModel
         switch(i)
         {
             case 0:
-                return "Exercise";
+                return "Exercise Nr";
             case 1:
                 return "Repetitions";
+            case 2:
+                return "Rep. time (s)";
+            case 3:
+                return "Delay (s)";
             default:
                 throw new RuntimeException("Internal error");
         }
@@ -125,13 +167,14 @@ class MyTableModel implements TableModel
     @Override
     public Class<?> getColumnClass(int i)
     {
-        return Integer.class;
+        if (i < 2) return Integer.class;
+        else return Double.class;
     }
 
     @Override
     public boolean isCellEditable(int row, int col)
     {
-        return col == 1;
+        return col > 0;
     }
 
     @Override
@@ -142,7 +185,13 @@ class MyTableModel implements TableModel
             case 0:
                 return row + 1;
             case 1:
-                if (row < exercises) return repetitions.get(row);
+                if (row < exercisesCount) return exercises.get(row).repetitions;
+                else return null;
+            case 2:
+                if (row < exercisesCount) return exercises.get(row).time;
+                else return null;
+            case 3:
+                if (row < exercisesCount) return exercises.get(row).delay;
                 else return null;
             default:
                 throw new RuntimeException("Internal error");
@@ -152,44 +201,90 @@ class MyTableModel implements TableModel
     @Override
     public void setValueAt(Object o, int row, int col)
     {
-        if (col != 1)
+        switch(col)
+        {
+            case 1:
+                maybeSetRepetitions(o, row);
+                break;
+            case 2:
+                maybeSetTime(o, row);
+                break;
+            case 3:
+                maybeSetDelay(o, row);
+            default:
                 throw new RuntimeException("Internal error");
+        }
+    }
+    
+    private int getInt(Object o)
+    {
         Integer n;
         try {
             n = (Integer) o;
         } catch (ClassCastException ex) {
                 throw new RuntimeException("Internal error");
         }
-        maybeSetRepetitions(n, row);
+        return n;
     }
     
-    private void maybeSetRepetitions(int n, int row)
+    private double getDouble(Object o)
     {
-        if (n < 0)
-            return;
-        if (row == exercises) // next exercise
-        {
-            if (n > 0)
-            {
-                repetitions.add(n);
-                exercises++;
-                fireChange(new TableModelEvent(this, row, row, 1, TableModelEvent.INSERT));
-            }
+        Double d;
+        try {
+            d = (Double) o;
+        } catch (ClassCastException ex) {
+                throw new RuntimeException("Internal error");
         }
-        else if (n > 0)
+        return d;
+    }
+    
+    private void maybeSetRepetitions(Object o, int row)
+    {
+        int n = getInt(o);
+        if (n > 0)
         {
-            repetitions.set(row, n);
-            fireChange(new TableModelEvent(this, row, row, 1));
+            exercises.get(row).repetitions = n;
+            fireChange(new TableModelEvent(this, row, row, TableModelEvent.ALL_COLUMNS));
         }
-        else
-        {
-            repetitions.remove(row);
-            exercises--;
-            fireChange(new TableModelEvent(this, row, row, 1, TableModelEvent.DELETE));
-        }
-        
     }
 
+    private void maybeSetTime(Object o, int row)
+    {
+        double d = getDouble(o);
+        if (d >= 0)
+        {
+            exercises.get(row).time = d;
+            fireChange(new TableModelEvent(this, row, row, TableModelEvent.ALL_COLUMNS));
+        }
+    }
+
+    private void maybeSetDelay(Object o, int row)
+    {
+        double d = getDouble(o);
+        if (d >= 0)
+        {
+            exercises.get(row).delay = d;
+            fireChange(new TableModelEvent(this, row, row, TableModelEvent.ALL_COLUMNS));
+        }
+    }
+    
+    public void addExercise()
+    {
+        int row = exercisesCount;
+        exercisesCount++;
+        exercises.add(new ExercisePlan(1, 0, 0));
+        fireChange(new TableModelEvent(this, row, row,
+            TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
+    }
+    
+    public void removeExercise(int row)
+    {
+        exercises.remove(row);
+        exercisesCount--;
+        fireChange(new TableModelEvent(this, row, row,
+            TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
+    }
+    
     @Override
     public void addTableModelListener(TableModelListener l)
     {
