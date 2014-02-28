@@ -10,7 +10,11 @@ import java.util.ArrayList;
  */
 public class WorkoutPlan implements Serializable
 {
-    int series;
-    double betweenSeriesTime;
-    ArrayList<ExercisePlan> exercises;
+    public WorkoutPlan()
+    {
+        exercises = new ArrayList<>();
+    }
+    public int series;
+    public double betweenSeriesTime;
+    public ArrayList<ExercisePlan> exercises;
 }
