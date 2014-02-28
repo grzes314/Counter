@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class ExercisePlan implements Serializable
 {
+    private final long seriaVersionUID = 1000001L;
     public int repetitions;
     public double time;
     public double delay;
@@ -25,5 +26,10 @@ public class ExercisePlan implements Serializable
         this.repetitions = original.repetitions;
         this.time = original.time;
         this.delay = original.delay;
+    }
+    
+    public double getTotalTime()
+    {
+        return delay + repetitions * time;
     }
 }
