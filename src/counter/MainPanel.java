@@ -83,6 +83,7 @@ public class MainPanel extends javax.swing.JPanel
         spinnerBreak = new javax.swing.JSpinner();
         jLabel3 = new javax.swing.JLabel();
         lblTotalTime = new javax.swing.JLabel();
+        buttonRun = new javax.swing.JButton();
 
         jLabel1.setText("Number of series: ");
 
@@ -132,6 +133,15 @@ public class MainPanel extends javax.swing.JPanel
 
         lblTotalTime.setText("          ");
 
+        buttonRun.setText("Run");
+        buttonRun.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonRunActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -161,6 +171,10 @@ public class MainPanel extends javax.swing.JPanel
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblTotalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(313, 313, 313)
+                .addComponent(buttonRun, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -173,7 +187,7 @@ public class MainPanel extends javax.swing.JPanel
                     .addComponent(jLabel2)
                     .addComponent(spinnerBreak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(16, 16, 16)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(buttonAdd)
@@ -182,7 +196,8 @@ public class MainPanel extends javax.swing.JPanel
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTotalTime))
-                .addGap(23, 23, 23))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buttonRun))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -208,10 +223,16 @@ public class MainPanel extends javax.swing.JPanel
         updateTimeLabel();
     }//GEN-LAST:event_spinnerBreakStateChanged
 
+    private void buttonRunActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonRunActionPerformed
+    {//GEN-HEADEREND:event_buttonRunActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonRunActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonAdd;
     private javax.swing.JButton buttonRem;
+    private javax.swing.JButton buttonRun;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -221,198 +242,4 @@ public class MainPanel extends javax.swing.JPanel
     private javax.swing.JSpinner spinnerSeries;
     private javax.swing.JTable table;
     // End of variables declaration//GEN-END:variables
-}
-
-class MyTableModel implements TableModel
-{
-    int exercisesCount;
-    ArrayList<ExercisePlan> exercises = new ArrayList<>();
-    private final ArrayList<TableModelListener> tableModelListeners = new ArrayList<>();
-    
-    @Override
-    public int getRowCount()
-    {
-        return exercisesCount;
-    }
-
-    @Override
-    public int getColumnCount()
-    {
-        return 4;
-    }
-
-    @Override
-    public String getColumnName(int i)
-    {
-        switch(i)
-        {
-            case 0:
-                return "Exercise Nr";
-            case 1:
-                return "Repetitions";
-            case 2:
-                return "Rep. time (s)";
-            case 3:
-                return "Delay (s)";
-            default:
-                throw new RuntimeException("Internal error");
-        }
-    }
-
-    @Override
-    public Class<?> getColumnClass(int i)
-    {
-        if (i < 2) return Integer.class;
-        else return Double.class;
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int col)
-    {
-        return col > 0;
-    }
-
-    @Override
-    public Object getValueAt(int row, int col)
-    {
-        switch(col)
-        {
-            case 0:
-                return row + 1;
-            case 1:
-                if (row < exercisesCount) return exercises.get(row).repetitions;
-                else return null;
-            case 2:
-                if (row < exercisesCount) return exercises.get(row).time;
-                else return null;
-            case 3:
-                if (row < exercisesCount) return exercises.get(row).delay;
-                else return null;
-            default:
-                throw new RuntimeException("Internal error");
-        }
-    }
-
-    @Override
-    public void setValueAt(Object o, int row, int col)
-    {
-        switch(col)
-        {
-            case 1:
-                maybeSetRepetitions(o, row);
-                break;
-            case 2:
-                maybeSetTime(o, row);
-                break;
-            case 3:
-                maybeSetDelay(o, row);
-                break;
-            default:
-                throw new RuntimeException("Internal error");
-        }
-    }
-    
-    private int getInt(Object o)
-    {
-        Integer n;
-        try {
-            n = (Integer) o;
-        } catch (ClassCastException ex) {
-                throw new RuntimeException("Internal error");
-        }
-        return n;
-    }
-    
-    private double getDouble(Object o)
-    {
-        Double d;
-        try {
-            d = (Double) o;
-        } catch (ClassCastException ex) {
-                throw new RuntimeException("Internal error");
-        }
-        return d;
-    }
-    
-    private void maybeSetRepetitions(Object o, int row)
-    {
-        int n = getInt(o);
-        if (n > 0)
-        {
-            exercises.get(row).repetitions = n;
-            fireChange(new TableModelEvent(this, row, row, TableModelEvent.ALL_COLUMNS));
-        }
-    }
-
-    private void maybeSetTime(Object o, int row)
-    {
-        double d = getDouble(o);
-        if (d >= 0)
-        {
-            exercises.get(row).time = d;
-            fireChange(new TableModelEvent(this, row, row, TableModelEvent.ALL_COLUMNS));
-        }
-    }
-
-    private void maybeSetDelay(Object o, int row)
-    {
-        double d = getDouble(o);
-        if (d >= 0)
-        {
-            exercises.get(row).delay = d;
-            fireChange(new TableModelEvent(this, row, row, TableModelEvent.ALL_COLUMNS));
-        }
-    }
-    
-    public void addExercise()
-    {
-        int row = exercisesCount;
-        exercisesCount++;
-        exercises.add(new ExercisePlan(1, 0, 0));
-        fireChange(new TableModelEvent(this, row, row,
-            TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
-    }
-    
-
-    void addExercise(ExercisePlan ex)
-    {
-        int row = exercisesCount;
-        exercisesCount++;
-        exercises.add(new ExercisePlan(ex));
-        fireChange(new TableModelEvent(this, row, row,
-            TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
-    }
-    
-    public void removeExercise(int row)
-    {
-        exercises.remove(row);
-        exercisesCount--;
-        fireChange(new TableModelEvent(this, row, row,
-            TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
-    }
-
-    void clear()
-    {
-        exercises.clear();
-        exercisesCount = 0;
-        fireChange(new TableModelEvent(this));
-    }
-    
-    @Override
-    public void addTableModelListener(TableModelListener l)
-    {
-        tableModelListeners.add(l);
-    }
-
-    @Override
-    public void removeTableModelListener(TableModelListener l)
-    {
-        tableModelListeners.remove(l);
-    }
-    
-    private void fireChange(TableModelEvent ev)
-    {
-        for (TableModelListener tml: tableModelListeners)
-            tml.tableChanged(ev);
-    }
 }
