@@ -1,6 +1,12 @@
 
 package counter;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -11,13 +17,22 @@ import javax.swing.event.TableModelListener;
 public class MainPanel extends javax.swing.JPanel
 {
     MyTableModel tableModel = new MyTableModel();
-    WorkoutRunner wr = new WorkoutRunner();
+    WorkoutRunner wr;
     /**
      * Creates new form MainPanel
      */
     public MainPanel()
     {
         initComponents();
+        SimpleSoundManager sm = new SimpleSoundManager();
+        try {
+            sm.init();
+            wr = new WorkoutRunner(sm);
+        } catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
+            JOptionPane.showMessageDialog(this, "Failed to init sound stuff");
+            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            wr = new WorkoutRunner();
+        }
         tableModel.addTableModelListener(new TableModelListener() {
             @Override public void tableChanged(TableModelEvent tme) {
                 updateTimeLabel();
