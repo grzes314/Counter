@@ -1,10 +1,8 @@
 
 package counter;
 
-import java.util.ArrayList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
 
 /**
  *
@@ -13,6 +11,7 @@ import javax.swing.table.TableModel;
 public class MainPanel extends javax.swing.JPanel
 {
     MyTableModel tableModel = new MyTableModel();
+    WorkoutRunner wr = new WorkoutRunner();
     /**
      * Creates new form MainPanel
      */
@@ -225,7 +224,7 @@ public class MainPanel extends javax.swing.JPanel
 
     private void buttonRunActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonRunActionPerformed
     {//GEN-HEADEREND:event_buttonRunActionPerformed
-        // TODO add your handling code here:
+        wr.runInNewThread(getPlan());
     }//GEN-LAST:event_buttonRunActionPerformed
 
 
