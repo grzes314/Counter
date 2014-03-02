@@ -27,7 +27,7 @@ public class WorkoutRunner implements ProgressObservable
     private int series;
     private int exercise;
     private int repetition;
-    private Action action;
+    private Action action = STARTING;
     private long begTime;
     private long endTime;
     private long pauseTime;

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -18,35 +20,36 @@ public class SimpleSoundManager implements SoundManager
 {
     
     private boolean initialized;
-    private Clip[] clips;
+    private Clip clip;
+    AudioInputStream streams[];
     private final Map<String, Integer> nameToNr = new HashMap<>();
     
     
-    public void init() throws LineUnavailableException, UnsupportedAudioFileException, IOException
+    public void init() throws UnsupportedAudioFileException, IOException, LineUnavailableException
     {
         nameToNr.put("series_start", 0);
         nameToNr.put("series_end", 1);
         nameToNr.put("exercise_start", 2);
         nameToNr.put("exercise_end", 3);
         nameToNr.put("repetition_end", 4);
-        clips = new Clip[nameToNr.size()];
-        readClips();
+        streams = new AudioInputStream[nameToNr.size()];
+        clip = AudioSystem.getClip();
+        readStreams();
         initialized = true;
     }
 
-    private void readClips() throws LineUnavailableException, UnsupportedAudioFileException, IOException
+    private void readStreams() throws LineUnavailableException, UnsupportedAudioFileException, IOException
     {
         for (Map.Entry<String, Integer> pair: nameToNr.entrySet())
-            readClip(pair.getKey(), pair.getValue());
+            readStream(pair.getKey(), pair.getValue());
     }
     
 
-    private void readClip(String event, int nr) throws LineUnavailableException, UnsupportedAudioFileException, IOException
+    private void readStream(String event, int nr) throws LineUnavailableException, UnsupportedAudioFileException, IOException
     {
-        clips[nr] = AudioSystem.getClip();
         InputStream stream = getClass().getResourceAsStream("/sounds/" + event + ".wav");
-        AudioInputStream ais = AudioSystem.getAudioInputStream( stream );
-        clips[nr].open(ais);
+        streams[nr] = AudioSystem.getAudioInputStream( stream );
+        streams[nr].mark(1000000000);
     }
     
     private void ensureInitialized()
@@ -93,9 +96,16 @@ public class SimpleSoundManager implements SoundManager
 
     private void play(String event)
     {
-        int nr = nameToNr.get(event);
-        clips[nr].setFramePosition(0);
-        clips[nr].start();
+        try {
+            int nr = nameToNr.get(event);
+            AudioInputStream stream = streams[nr];
+            stream.reset();
+            clip.close();
+            clip.open(stream);
+            clip.start();
+        } catch (LineUnavailableException | IOException ex) {
+            Logger.getLogger(SimpleSoundManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

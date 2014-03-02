@@ -14,7 +14,7 @@ public class ProgressInfo
     public final Action action;
     
     public enum Action {
-        REPETITION, EXERCISE_BREAK, SERIES_BREAK, FINISHED
+        REPETITION, EXERCISE_BREAK, SERIES_BREAK, FINISHED, STARTING
     }
 
     public ProgressInfo(int series, int exercise, int repetition, Action action, double remainingTime)

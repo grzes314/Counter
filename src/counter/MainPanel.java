@@ -132,6 +132,8 @@ public class MainPanel extends javax.swing.JPanel
                 return "Break between series";
             case FINISHED:
                 return "Workout finished";
+            case STARTING:
+                return "Workout initialization";
             default:
                 throw new AssertionError(action.name());
             
