@@ -1,5 +1,6 @@
 package counter;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class SimpleSoundManager implements SoundManager
     private void readStream(String event, int nr) throws LineUnavailableException, UnsupportedAudioFileException, IOException
     {
         InputStream stream = getClass().getResourceAsStream("/sounds/" + event + ".wav");
+        stream = new BufferedInputStream(stream);
         streams[nr] = AudioSystem.getAudioInputStream( stream );
         streams[nr].mark(1000000000);
     }
