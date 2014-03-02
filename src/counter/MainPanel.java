@@ -32,7 +32,7 @@ public class MainPanel extends javax.swing.JPanel
         try {
             ((SimpleSoundManager) sm).init();
         } catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
-            JOptionPane.showMessageDialog(this, "Failed to init sound stuff");
+            JOptionPane.showMessageDialog(null, "Failed to init sound stuff");
             Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
             sm = new DummySoundManager();
         }
@@ -195,8 +195,8 @@ public class MainPanel extends javax.swing.JPanel
         jLabel6 = new javax.swing.JLabel();
         seriesLbl = new javax.swing.JLabel();
         exerciseLbl = new javax.swing.JLabel();
-        pauseButton = new javax.swing.JToggleButton();
         stopButton = new javax.swing.JButton();
+        pauseButton = new javax.swing.JButton();
 
         jLabel1.setText("Number of series: ");
 
@@ -341,16 +341,6 @@ public class MainPanel extends javax.swing.JPanel
                 .addContainerGap())
         );
 
-        pauseButton.setText("Pause");
-        pauseButton.setEnabled(false);
-        pauseButton.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                pauseButtonActionPerformed(evt);
-            }
-        });
-
         stopButton.setText("Stop");
         stopButton.setEnabled(false);
         stopButton.addActionListener(new java.awt.event.ActionListener()
@@ -358,6 +348,15 @@ public class MainPanel extends javax.swing.JPanel
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 stopButtonActionPerformed(evt);
+            }
+        });
+
+        pauseButton.setText("Pause");
+        pauseButton.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                pauseButtonActionPerformed(evt);
             }
         });
 
@@ -425,8 +424,8 @@ public class MainPanel extends javax.swing.JPanel
                 .addGap(42, 42, 42)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(buttonRun)
-                    .addComponent(pauseButton)
-                    .addComponent(stopButton)))
+                    .addComponent(stopButton)
+                    .addComponent(pauseButton)))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -457,15 +456,15 @@ public class MainPanel extends javax.swing.JPanel
         runClicked();
     }//GEN-LAST:event_buttonRunActionPerformed
 
-    private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_pauseButtonActionPerformed
-    {//GEN-HEADEREND:event_pauseButtonActionPerformed
-        pauseClicked();
-    }//GEN-LAST:event_pauseButtonActionPerformed
-
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_stopButtonActionPerformed
     {//GEN-HEADEREND:event_stopButtonActionPerformed
         stopClicked();
     }//GEN-LAST:event_stopButtonActionPerformed
+
+    private void pauseButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_pauseButtonActionPerformed
+    {//GEN-HEADEREND:event_pauseButtonActionPerformed
+        pauseClicked();
+    }//GEN-LAST:event_pauseButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -484,7 +483,7 @@ public class MainPanel extends javax.swing.JPanel
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTotalTime;
-    private javax.swing.JToggleButton pauseButton;
+    private javax.swing.JButton pauseButton;
     private javax.swing.JLabel remainingLbl;
     private javax.swing.JLabel repetitionLbl;
     private javax.swing.JLabel seriesLbl;
