@@ -24,9 +24,9 @@ public class WorkoutRunner implements ProgressObservable
     private ExercisePlan currEx;
     private Thread thread;
     private boolean paused = false;
-    private int series;
-    private int exercise;
-    private int repetition;
+    private int series = 1;
+    private int exercise = 1;
+    private int repetition = 1;
     private Action action = STARTING;
     private long begTime;
     private long endTime;
@@ -34,7 +34,7 @@ public class WorkoutRunner implements ProgressObservable
     private final ProgressObservableSupport pos = new ProgressObservableSupport();
     private Timer reporter;
     private boolean stopped;
-    
+    private boolean finished;
     
     public WorkoutRunner()
     {
@@ -62,69 +62,97 @@ public class WorkoutRunner implements ProgressObservable
     
     private void run()
     {
-        startNextSeries();
-        while (!(hasEnded() || stopped))
+        initRun();
+        while (!(stopped || finished))
         {
             step();
         }
+        clean();
+    }
+    
+    private void initRun()
+    {
+        if (wp.exercises.isEmpty()) {
+            finished = true;
+            return;
+        }
+        sManager.playSeriesStart();
+        currEx = wp.exercises.get(0);
+        action = EXERCISE_BREAK;
+        sleep(currEx.delay);
+        if (stopped)
+            return;
+        sManager.playExerciseStart();
     }
     
     private void step()
     {
-        repetition++;
         action = REPETITION;
         sleep(currEx.time);
+        if (stopped || finished)
+            return;
         sManager.playRepetitionEnd();
-        maybeNextExercise();
+        if (isLastRepetition())
+        {
+            sManager.playExerciseEnd();
+            repetition = 1;
+            startNextExercise();
+        }
+        else repetition++;
     }
     
-    private void startNextSeries()
+    private boolean isLastRepetition()
     {
-        series++;
-        exercise = 0;
-        sManager.playSeriesStart();
-        startNextExercise();
+        return repetition >= currEx.repetitions;
     }
     
     private void startNextExercise()
     {
-        currEx = wp.exercises.get(exercise);
-        exercise++;
-        repetition = 0;
+        if (isLastExercise())
+        {
+            sManager.playSeriesEnd();
+            exercise = 1;
+            startNextSeries();
+        }
+        else exercise++;
+        if (stopped || finished)
+            return;
+        currEx = wp.exercises.get(exercise-1);
         action = EXERCISE_BREAK;
         sleep(currEx.delay);
         sManager.playExerciseStart();
     }
     
-    private void maybeNextExercise()
+    private boolean isLastExercise()
     {
-        if (repetition >= currEx.repetitions)
-        {
-            sManager.playExerciseEnd();
-            if (!maybeNextSeries())
-                startNextExercise();
-        }
+        return exercise >= wp.exercises.size();
     }
     
-    private boolean maybeNextSeries()
+    private void startNextSeries()
     {
-        if (exercise >= wp.exercises.size())
+        if (isLastSeries())
         {
-            sManager.playSeriesEnd();
-            action = Action.SERIES_BREAK;
-            sleep(wp.betweenSeriesTime);
-            startNextSeries();
-            return true;
+            finished = true;
+            return;
         }
-        return false;
+        else series++;
+        action = SERIES_BREAK;
+        sleep(wp.betweenSeriesTime);
+        if (stopped)
+            return;
+        sManager.playSeriesStart();
     }
     
-    public boolean hasEnded()
+    public boolean isLastSeries()
     {
-        return series > wp.series;
+        return series  == wp.series;
+    }
+    
+    public boolean hasFinished()
+    {
+        return finished;
     }
 
-    
     private void initTimer()
     {
         reporter = new Timer(500, new ActionListener() {
@@ -163,7 +191,7 @@ public class WorkoutRunner implements ProgressObservable
         long toWait = endTime - begTime;
         do {
             try {
-                wait(toWait);
+                wait(Math.max(1, toWait));
             } catch (InterruptedException ex) {
                 Logger.getLogger(WorkoutRunner.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -208,10 +236,14 @@ public class WorkoutRunner implements ProgressObservable
 
     public synchronized void stop()
     {
-        reporter.stop();
         stopped = true;
         notify();
     }
     
-    
+    private void clean()
+    {
+        action = Action.FINISHED;
+        reporter.setRepeats(false);
+        //reporter.stop();
+    }
 }
